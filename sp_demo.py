@@ -35,8 +35,8 @@ if __name__ == "__main__":
     plt.show()
     # calculate mean and std of sp
     mean = np.mean(daily_return_array)
-    std = np.std(daily_return_array)
-    # assuming normaly iid of return ,simulate the stock price
+    std = np.std(daily_return_array, ddof=1)
+    # assuming normally iid of return ,simulate the stock price
     n = len(daily_return_array)
     s0 = adj_close.iloc[0, 0]
     r = np.random.randn(n, 50)*std + mean
