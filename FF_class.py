@@ -35,8 +35,8 @@ class DataHandler:
         elif type(y_index) is str:
             y = y.loc[:, y_index]
         else:
-            raise IndexError("y_list should be all integer or all string")
-        y =y.values
+            raise IndexError("y_index should be integer or string")
+        y = y.values
         y = y-rf
         if add_constant_to_x:
             x = add_constant(x, prepend=True, has_constant='raise')
@@ -46,6 +46,7 @@ class DataHandler:
         if name is None:
             name = self.df_y.columns[y_index]
         me_name, bm_name = name.split(" ")
+        # bm_name = name.split(" ")[1]
         if me_name == 'SMALL':
             me_name = 'ME1'
         elif me_name == 'BIG':

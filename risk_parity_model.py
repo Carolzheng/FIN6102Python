@@ -20,19 +20,23 @@ data.dropna(how='any', inplace=True)
 
 def calculate_risk_contribution(w, cov):
     sigma_p = np.sqrt(np.dot(np.dot(w.T,cov), w))
-    risk_contrib = w * np.dot(cov, w) / sigma_p
+    risk_contrib = w * np.dot(cov, w) / sigma_p # * stand for elementwise product
     risk_contrib_pct = risk_contrib/sigma_p
     return risk_contrib_pct
 
-def get_risk_parity_weight(cov):
-    n = w.shape[0]
+def get_risk_parity_weight(n ,cov):
     def opt(w):
         risk_pct = calculate_risk_contribution(w, cov)
         loss = np.sum(np.square(risk_pct - np.array([1/n]*n, ndmin=2)))
         return loss
     init_w = np.array([1/n]*n, ndmin=2)
     bounds = [[0, 1]]*n
-    cons = [{'type':'eq', 'fun': lambda x: np.sum(x)-1}]
+    cons = [{'type':'eq', 'fun': lambda x: np.sum(x)-1}]                        #constraints
     res = minimize(opt, init_w, constraints = cons, bounds=bounds)
     return res.x
 
+train_x = data.iloc[:800]
+cov = np.cov(train_x.T)
+n = data.shape[1]
+w_star = get_risk_parity_weight(n, cov)
+risk_pct = calculate_risk_contribution(w_star, cov)

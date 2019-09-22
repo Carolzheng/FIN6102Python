@@ -10,6 +10,12 @@ import pandas as pd
 import statsmodels.api as sm
 import numpy as np
 
+def record_results(results, data, feature_name, port_name):
+    temp_df = pd.DataFrame(data=[data], index=[feature_name], columns=['a', 'b', 's', 'h'])
+    temp_df['port'] = port_name
+    results = results.append(temp_df)
+    return results
+
 # read data using the function defined in sp_functions
 df_x = get_stock_data(path='data/FF_Three_Factor_Monthly.csv', end=-1, fmt='%Y%m')
 df_y = get_stock_data(path='data/25_Portfolios_5x5.csv', end=-1, fmt='%Y%m')
@@ -30,18 +36,21 @@ factors = np.insert(factors, obj=0, values=1, axis=1)
 results = pd.DataFrame()
 for i in range(25):
     port_return = df_y.iloc[:, i].values
-    port_excess_return  = port_return -rf
+    port_excess_return  = port_return -rf 
     model=sm.OLS(endog=port_excess_return, exog=factors)
     res = model.fit()
-    # create a temporary dataframe to store the values. To identify the meaning of each value, we need to know which 
-    # coefficient it is ('a' or 'b' or 's' or 'h'), whether it is params or tvalues, and which portfolio it is representing.
-    # Therefore, we have to add columns, index and a 'port' column to help us understand the values stored.
-    temp_df = pd.DataFrame(data=[res.params], index=['params'], columns=['a', 'b', 's', 'h'])
-    temp_df['port'] = df_y.columns[i]
+"""
+     create a temporary dataframe to store the values. To identify the meaning of each value, we need to know which 
+     coefficient it is ('a' or 'b' or 's' or 'h'), whether it is params or tvalues, and which portfolio it is representing.
+     Therefore, we have to add columns, index and a 'port' column to help us understand the values stored.
+"""
+#    temp_df = pd.DataFrame(data=[res.params], index=['params'], columns=['a', 'b', 's', 'h'])
+#    temp_df['port'] = df_y.columns[i]
     # unlike list, when you append value to dataframe, you have to store the returned value.
-    results = results.append(temp_df)
-    temp_df = pd.DataFrame(data=[res.tvalues], index=['tvalues'], columns=['a', 'b', 's', 'h'])
-    temp_df['port'] = df_y.columns[i]
-    results = results.append(temp_df)
+    results = record_results(results, res.params, 'params', df_y.columns[i])
+    results = record_results(results, res.tvalues, 'tvalue', df_y.columns[i])
+#    temp_df = pd.DataFrame(data=[res.tvalues], index=['tvalues'], columns=['a', 'b', 's', 'h'])
+#    temp_df['port'] = df_y.columns[i]
+#    results = results.append(temp_df)
     # res.summary() will give you a general description of the regression results.
     #print(res.summary())
